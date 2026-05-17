@@ -1,0 +1,494 @@
+<!-- =====================================================================
+     SCORE2-Diabetes 10 年心血管風險計算器（繁體中文衛教 + 計算器）
+     For: WordPress (Flatsome / UX Builder) HTML element
+     用法：在 UX Builder 中新增「HTML」元素，將整段（含本註解以下全部）
+     貼入即可。可重複多次貼到同一頁也不會衝突（已使用 data-instance）。
+     ===================================================================== -->
+<div class="s2d-wrap" data-s2d-instance>
+  <style>
+    /* ---------- 樣式（全部以 .s2d- 前綴，避免與主題衝突） ---------- */
+    .s2d-wrap{
+      font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei","Helvetica Neue",Arial,sans-serif;
+      color:#222;line-height:1.75;max-width:860px;margin:24px auto;padding:0 4px;
+      font-size:16px;-webkit-text-size-adjust:100%;
+    }
+    .s2d-wrap *{box-sizing:border-box;}
+    .s2d-wrap h2{font-size:1.55em;color:#0f3d6b;border-left:6px solid #1565c0;
+      padding:6px 0 6px 14px;margin:28px 0 14px;line-height:1.4;}
+    .s2d-wrap h3{font-size:1.2em;color:#0f3d6b;margin:22px 0 10px;}
+    .s2d-wrap p{margin:10px 0;}
+    .s2d-wrap ul{padding-left:22px;margin:10px 0;}
+    .s2d-wrap li{margin:4px 0;}
+    .s2d-wrap .s2d-lead{background:#eaf3fb;border-left:4px solid #1565c0;
+      padding:14px 18px;border-radius:6px;margin:18px 0;}
+    .s2d-wrap .s2d-note{background:#fff8e1;border-left:4px solid #f9a825;
+      padding:12px 16px;border-radius:6px;margin:16px 0;font-size:.95em;}
+    .s2d-wrap .s2d-warn{background:#fdecea;border-left:4px solid #c62828;
+      padding:12px 16px;border-radius:6px;margin:16px 0;font-size:.95em;}
+    .s2d-wrap .s2d-card{background:#fff;border:1px solid #d9e2ec;border-radius:10px;
+      padding:18px 18px 6px;margin:18px 0;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+    .s2d-wrap table{border-collapse:collapse;width:100%;margin:14px 0;font-size:.95em;}
+    .s2d-wrap th,.s2d-wrap td{border:1px solid #d9e2ec;padding:8px 10px;text-align:left;}
+    .s2d-wrap th{background:#f4f8fc;color:#0f3d6b;}
+    .s2d-wrap .s2d-cat-low td{background:#e8f5e9;}
+    .s2d-wrap .s2d-cat-mod td{background:#fff8e1;}
+    .s2d-wrap .s2d-cat-high td{background:#ffe0b2;}
+    .s2d-wrap .s2d-cat-vhigh td{background:#ffcdd2;}
+
+    /* 表單 */
+    .s2d-form{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;}
+    @media (max-width:600px){.s2d-form{grid-template-columns:1fr;}}
+    .s2d-field{display:flex;flex-direction:column;}
+    .s2d-field label{font-weight:600;color:#0f3d6b;margin-bottom:4px;font-size:.95em;}
+    .s2d-field .s2d-hint{font-size:.82em;color:#666;margin-top:3px;line-height:1.4;}
+    .s2d-input-row{display:flex;gap:6px;align-items:stretch;}
+    .s2d-wrap input[type="number"],
+    .s2d-wrap select{
+      width:100%;padding:9px 10px;font-size:1em;border:1px solid #c4cdd5;
+      border-radius:6px;background:#fff;color:#222;line-height:1.4;
+      -webkit-appearance:none;appearance:none;
+    }
+    .s2d-wrap select{
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%23555' d='M0 0l5 6 5-6z'/></svg>");
+      background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;
+    }
+    .s2d-wrap input[type="number"]:focus,
+    .s2d-wrap select:focus{outline:2px solid #1565c0;outline-offset:1px;border-color:#1565c0;}
+    .s2d-unit-toggle{display:inline-flex;border:1px solid #c4cdd5;border-radius:6px;overflow:hidden;}
+    .s2d-unit-toggle button{
+      background:#fff;border:0;padding:8px 10px;font-size:.85em;color:#444;cursor:pointer;
+      line-height:1;font-family:inherit;
+    }
+    .s2d-unit-toggle button.s2d-active{background:#1565c0;color:#fff;}
+    .s2d-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;}
+    .s2d-btn{
+      background:#1565c0;color:#fff;border:0;padding:11px 22px;font-size:1.02em;
+      border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;
+    }
+    .s2d-btn:hover{background:#0d47a1;}
+    .s2d-btn.s2d-secondary{background:#eceff1;color:#333;}
+    .s2d-btn.s2d-secondary:hover{background:#cfd8dc;}
+
+    /* 結果 */
+    .s2d-result{margin-top:18px;padding:18px;border-radius:10px;display:none;}
+    .s2d-result.s2d-show{display:block;}
+    .s2d-result .s2d-pct{font-size:2.4em;font-weight:700;line-height:1;margin:6px 0 8px;}
+    .s2d-result .s2d-cat{font-size:1.15em;font-weight:600;margin-bottom:8px;}
+    .s2d-result.s2d-low   {background:#e8f5e9;border:1px solid #66bb6a;color:#1b5e20;}
+    .s2d-result.s2d-mod   {background:#fff8e1;border:1px solid #fbc02d;color:#795548;}
+    .s2d-result.s2d-high  {background:#ffe0b2;border:1px solid #fb8c00;color:#bf360c;}
+    .s2d-result.s2d-vhigh {background:#ffcdd2;border:1px solid #e53935;color:#b71c1c;}
+    .s2d-result.s2d-err   {background:#fdecea;border:1px solid #c62828;color:#b71c1c;}
+    .s2d-result .s2d-advice{margin-top:10px;font-size:.95em;line-height:1.7;color:#333;}
+
+    .s2d-small{font-size:.85em;color:#666;}
+    .s2d-ref{font-size:.88em;color:#444;}
+    .s2d-ref ol{padding-left:22px;}
+    .s2d-ref li{margin:6px 0;}
+    .s2d-ref a{color:#1565c0;text-decoration:underline;word-break:break-all;}
+  </style>
+
+  <!-- ========================= 衛教內容 ========================= -->
+  <h2>SCORE2-Diabetes：第二型糖尿病患者 10 年心血管疾病風險評估</h2>
+
+  <div class="s2d-lead">
+    <strong>SCORE2-Diabetes</strong> 是歐洲心臟學會（ESC）於 2023 年發表，
+    專門針對 <strong>40 至 69 歲、第二型糖尿病、尚未發生心血管疾病</strong>
+    的患者，預估未來 <strong>10 年發生致死性或非致死性心血管事件
+    （心肌梗塞、中風）</strong> 機率的風險預測模型。本工具依據原始演算法
+    在前端即時計算，<strong>所有資料皆不會上傳</strong>。
+  </div>
+
+  <h3>適用對象</h3>
+  <ul>
+    <li>年齡 <strong>40 ～ 69 歲</strong></li>
+    <li>已確診 <strong>第二型糖尿病</strong></li>
+    <li>過去 <strong>未曾</strong> 罹患動脈粥狀硬化性心血管疾病（如心肌梗塞、中風、需血管支架／繞道手術等）</li>
+    <li>未有嚴重器官損傷（如末期腎病變）</li>
+  </ul>
+
+  <h3>不適用對象</h3>
+  <ul>
+    <li>年齡 &lt; 40 歲 或 &gt; 69 歲</li>
+    <li>第一型糖尿病</li>
+    <li>已知心血管疾病患者（請依次級預防建議直接由醫師評估）</li>
+    <li>慢性腎臟病第 4～5 期（eGFR &lt; 30）建議使用 SCORE2-CKD</li>
+  </ul>
+
+  <h2>線上計算器</h2>
+
+  <div class="s2d-card">
+    <form class="s2d-form" onsubmit="return false;" autocomplete="off">
+
+      <div class="s2d-field">
+        <label>性別</label>
+        <select data-s2d="gender">
+          <option value="male">男性</option>
+          <option value="female">女性</option>
+        </select>
+      </div>
+
+      <div class="s2d-field">
+        <label>年齡（40 ～ 69 歲）</label>
+        <input type="number" data-s2d="age" min="40" max="69" step="1" placeholder="例：58">
+      </div>
+
+      <div class="s2d-field">
+        <label>是否目前吸菸</label>
+        <select data-s2d="smoker">
+          <option value="0">否（不吸菸或已戒菸）</option>
+          <option value="1">是（目前仍吸菸）</option>
+        </select>
+      </div>
+
+      <div class="s2d-field">
+        <label>收縮壓 SBP（mmHg）</label>
+        <input type="number" data-s2d="sbp" min="80" max="240" step="1" placeholder="例：135">
+        <span class="s2d-hint">建議使用近期門診平均值</span>
+      </div>
+
+      <div class="s2d-field">
+        <label>總膽固醇</label>
+        <div class="s2d-input-row">
+          <input type="number" data-s2d="chol" min="50" max="500" step="0.1" placeholder="例：190">
+          <span class="s2d-unit-toggle" data-s2d-unit="chol">
+            <button type="button" data-val="mgdl" class="s2d-active">mg/dL</button>
+            <button type="button" data-val="mmol">mmol/L</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="s2d-field">
+        <label>高密度脂蛋白膽固醇（HDL-C）</label>
+        <div class="s2d-input-row">
+          <input type="number" data-s2d="hdl" min="10" max="200" step="0.1" placeholder="例：45">
+          <span class="s2d-unit-toggle" data-s2d-unit="hdl">
+            <button type="button" data-val="mgdl" class="s2d-active">mg/dL</button>
+            <button type="button" data-val="mmol">mmol/L</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="s2d-field">
+        <label>糖化血色素 HbA1c</label>
+        <div class="s2d-input-row">
+          <input type="number" data-s2d="hba1c" min="3" max="20" step="0.1" placeholder="例：7.5">
+          <span class="s2d-unit-toggle" data-s2d-unit="hba1c">
+            <button type="button" data-val="pct" class="s2d-active">% (NGSP)</button>
+            <button type="button" data-val="mmol">mmol/mol (IFCC)</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="s2d-field">
+        <label>糖尿病診斷年齡</label>
+        <input type="number" data-s2d="dmage" min="1" max="80" step="1" placeholder="例：50">
+        <span class="s2d-hint">即您第一次被診斷糖尿病時的年齡</span>
+      </div>
+
+      <div class="s2d-field">
+        <label>eGFR（mL/min/1.73m²）</label>
+        <input type="number" data-s2d="egfr" min="15" max="200" step="1" placeholder="例：85">
+        <span class="s2d-hint">腎絲球過濾率，可由抽血報告查詢</span>
+      </div>
+
+      <div class="s2d-field">
+        <label>風險區域</label>
+        <select data-s2d="region">
+          <option value="Low">低風險區（Low）</option>
+          <option value="Moderate" selected>中等風險區（Moderate）</option>
+          <option value="High">高風險區（High）</option>
+          <option value="Very high">極高風險區（Very high）</option>
+        </select>
+        <span class="s2d-hint">
+          原始模型以歐洲國家分區，台灣不在原始分類內；
+          建議選 <strong>Moderate</strong> 作為參考（詳見下方說明）。
+        </span>
+      </div>
+
+      <div class="s2d-actions">
+        <button type="button" class="s2d-btn" data-s2d-action="calc">計算 10 年風險</button>
+        <button type="button" class="s2d-btn s2d-secondary" data-s2d-action="reset">清除重填</button>
+      </div>
+    </form>
+
+    <div class="s2d-result" data-s2d="result" role="status" aria-live="polite"></div>
+  </div>
+
+  <!-- ========================= 結果解讀 ========================= -->
+  <h2>結果解讀（依 2023 ESC 糖尿病心血管疾病管理指引）</h2>
+  <table>
+    <thead>
+      <tr><th>10 年心血管風險分數</th><th>風險分組</th><th>建議</th></tr>
+    </thead>
+    <tbody>
+      <tr class="s2d-cat-low"><td>&lt; 5%</td><td>低風險</td>
+        <td>持續健康生活型態：戒菸、運動、地中海／得舒飲食、體重控制。</td></tr>
+      <tr class="s2d-cat-mod"><td>5% ～ &lt; 10%</td><td>中等風險</td>
+        <td>強化生活型態介入，依醫師評估考慮血壓、血糖、血脂藥物。</td></tr>
+      <tr class="s2d-cat-high"><td>10% ～ &lt; 20%</td><td>高風險</td>
+        <td>積極控制 LDL（目標 &lt; 70 mg/dL）、血壓（&lt; 130/80）、血糖；可考慮使用具心血管保護效果之 GLP-1 RA 或 SGLT2 抑制劑。</td></tr>
+      <tr class="s2d-cat-vhigh"><td>≥ 20%</td><td>極高風險</td>
+        <td>等同次級預防強度：LDL 目標 &lt; 55 mg/dL、強化降壓、優先考量具心血管預後實證之降糖藥物，並進行整體共病管理。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>關於「風險區域」的選擇</h3>
+  <p>
+    SCORE2-Diabetes 原始模型以歐洲 ESC 心血管死亡率分為四區：
+    Low（低）、Moderate（中）、High（高）、Very high（極高）。
+    台灣未被納入歐洲分區。依世界衛生組織與多項流行病學資料，
+    台灣的心血管死亡率低於東歐／南歐，與西歐／北歐相近，
+    建議實務上可選 <strong>Moderate</strong>（中等風險區）作為合理參考。
+    若需更精準針對亞洲族群的版本，可參考
+    <em>SCORE2-Asia-Pacific</em>（2024）重新校正後的模型。
+  </p>
+
+  <h3>單位換算說明</h3>
+  <ul>
+    <li>總膽固醇 / HDL-C：<code>mg/dL ÷ 38.67 = mmol/L</code></li>
+    <li>HbA1c：<code>mmol/mol = (NGSP% − 2.15) × 10.929</code>
+        （例：7.0% ≈ 53 mmol/mol；8.0% ≈ 64 mmol/mol）</li>
+  </ul>
+
+  <div class="s2d-warn">
+    <strong>重要免責聲明：</strong>
+    本計算器僅供教育與衛教用途，<strong>不能取代專業醫療診斷或治療建議</strong>。
+    計算結果為族群層級的統計推估，個別差異甚大；
+    任何用藥或生活方式調整，請務必諮詢您的主治醫師。
+    本工具完全在您的瀏覽器內計算，所有輸入資料 <strong>不會傳送、不會儲存</strong>。
+  </div>
+
+  <h3>參考文獻 / Reference</h3>
+  <div class="s2d-ref">
+    <ol>
+      <li>
+        SCORE2-Diabetes Working Group and the ESC Cardiovascular Risk Collaboration.
+        SCORE2-Diabetes: 10-year cardiovascular risk estimation in type 2 diabetes in Europe.
+        <em>Eur Heart J.</em> 2023 Jul 21;44(28):2544-2556.
+        doi:10.1093/eurheartj/ehad260. PMID: 37247330; PMCID: PMC10361012.
+      </li>
+      <li>
+        Marx N, Federici M, Schütt K, et al.
+        2023 ESC Guidelines for the management of cardiovascular disease in patients with diabetes.
+        <em>Eur Heart J.</em> 2023;44(39):4043–4140. doi:10.1093/eurheartj/ehad192.
+      </li>
+    </ol>
+  </div>
+
+  <p class="s2d-small">
+    本頁演算法實作依據開源 R 套件 <code>RiskScorescvd</code> 中 <code>SCORE2_Diabetes()</code> 函式之公式，以 JavaScript 重寫供前端即時運算。
+  </p>
+</div>
+
+<script>
+/* =============================================================
+ *  SCORE2-Diabetes – 前端 JavaScript 實作
+ *  以 IIFE 包住，避免污染全域；
+ *  使用 data-s2d-instance 屬性，可同頁多次重複嵌入。
+ * ============================================================= */
+(function(){
+  // 對應 R 套件 round_to_nearest_digit() 的對稱進位
+  function roundHalfUp(num, digits){
+    digits = digits || 0;
+    var sign = num < 0 ? -1 : 1;
+    var n = Math.abs(num) * Math.pow(10, digits);
+    n = Math.trunc(n + 0.5 + 1e-12);
+    return sign * n / Math.pow(10, digits);
+  }
+
+  // 風險區域對應 scale1, scale2
+  var SCALE = {
+    "Low|male":       [-0.5699, 0.7476],
+    "Moderate|male":  [-0.1565, 0.8009],
+    "High|male":      [ 0.3207, 0.9360],
+    "Very high|male": [ 0.5836, 0.8294],
+    "Low|female":     [-0.7380, 0.7019],
+    "Moderate|female":[-0.3143, 0.7701],
+    "High|female":    [ 0.5710, 0.9369],
+    "Very high|female":[0.9412, 0.8329]
+  };
+
+  // 演算法主體（已固定 diabetes = 1，本工具僅給糖尿病患者用）
+  function score2Diabetes(p){
+    var age = p.age, sbp = p.sbp, chol = p.chol, hdl = p.hdl;
+    var hba1c = p.hba1c, egfr = p.egfr, dmage = p.dmage;
+    var smoker = p.smoker, diabetes = 1;
+
+    var key = p.region + "|" + p.gender;
+    if(!SCALE[key]) return null;
+    var s1 = SCALE[key][0], s2 = SCALE[key][1];
+
+    var ageT  = (age - 60) / 5;
+    var sbpT  = (sbp - 120) / 20;
+    var cholT = (chol - 6) / 1;
+    var hdlT  = (hdl - 1.3) / 0.5;
+    var a1cT  = (hba1c - 31) / 9.34;
+    var egfrT = (Math.log(egfr) - 4.5) / 0.15;
+    var dmAgeT= (dmage - 50) / 5;
+
+    var lp, base;
+    if(p.gender === "male"){
+      base = 0.9605;
+      lp =
+          0.5368 * ageT
+        + 0.4774 * smoker
+        + 0.1322 * sbpT
+        + 0.6457 * diabetes
+        + 0.1102 * cholT
+        + (-0.1087) * hdlT
+        + (-0.0672) * ageT * smoker
+        + (-0.0268) * ageT * sbpT
+        + (-0.0983) * ageT * diabetes
+        + (-0.0181) * ageT * cholT
+        + 0.0095   * ageT * hdlT
+        + (-0.0998) * diabetes * dmAgeT
+        + 0.0955  * a1cT
+        + (-0.0591) * egfrT
+        + 0.0058  * egfrT * egfrT
+        + (-0.0134) * a1cT * ageT
+        + 0.0115  * egfrT * ageT;
+    } else {
+      base = 0.9776;
+      lp =
+          0.6624 * ageT
+        + 0.6139 * smoker
+        + 0.1421 * sbpT
+        + 0.8096 * diabetes
+        + 0.1127 * cholT
+        + (-0.1568) * hdlT
+        + (-0.1122) * ageT * smoker
+        + (-0.0167) * ageT * sbpT
+        + (-0.1272) * ageT * diabetes
+        + (-0.0200) * ageT * cholT
+        + 0.0186   * ageT * hdlT
+        + (-0.118)  * diabetes * dmAgeT
+        + 0.1173  * a1cT
+        + (-0.0640) * egfrT
+        + 0.0062  * egfrT * egfrT
+        + (-0.0196) * a1cT * ageT
+        + 0.0169  * egfrT * ageT;
+    }
+
+    var uncal = 1 - Math.pow(base, Math.exp(lp));
+    if(uncal <= 0 || uncal >= 1) return null;
+    var calibrated = 1 - Math.exp(-Math.exp(s1 + s2 * Math.log(-Math.log(1 - uncal))));
+    var pct = roundHalfUp(calibrated * 100, 1);
+    return pct;
+  }
+
+  function classify(pct){
+    if(pct < 5)  return {key:"low",   label:"低風險",
+      advice:"持續健康生活型態：均衡飲食、規律運動、戒菸、體重控制，並定期追蹤血壓、血糖、血脂。"};
+    if(pct < 10) return {key:"mod",   label:"中等風險",
+      advice:"強化生活型態介入；依您主治醫師評估，可能需要開始或加強血壓、血糖、血脂藥物治療。"};
+    if(pct < 20) return {key:"high",  label:"高風險",
+      advice:"建議積極控制 LDL（目標 <70 mg/dL）、血壓（<130/80 mmHg）；可考慮使用具心血管保護實證之 GLP-1 RA 或 SGLT2 抑制劑，並戒菸。"};
+    return            {key:"vhigh", label:"極高風險",
+      advice:"風險等同次級預防：LDL 目標 <55 mg/dL、強化降壓、優先選用有心血管預後實證之降糖藥物；請務必盡快與您的主治醫師討論整體治療計畫。"};
+  }
+
+  // 單位換算
+  function toMmolL(val, unit){ return unit === "mmol" ? val : val / 38.67; }
+  function toMmolMol(val, unit){
+    return unit === "mmol" ? val : (val - 2.15) * 10.929;
+  }
+
+  // 綁定每一個 instance
+  function init(root){
+    if(root.dataset.s2dBound) return;
+    root.dataset.s2dBound = "1";
+
+    var units = { chol:"mgdl", hdl:"mgdl", hba1c:"pct" };
+
+    root.querySelectorAll("[data-s2d-unit]").forEach(function(grp){
+      grp.addEventListener("click", function(e){
+        var btn = e.target.closest("button[data-val]");
+        if(!btn) return;
+        var key = grp.getAttribute("data-s2d-unit");
+        units[key] = btn.getAttribute("data-val");
+        grp.querySelectorAll("button").forEach(function(b){
+          b.classList.toggle("s2d-active", b === btn);
+        });
+      });
+    });
+
+    function $(name){ return root.querySelector('[data-s2d="'+name+'"]'); }
+
+    function showError(msg){
+      var box = $("result");
+      box.className = "s2d-result s2d-show s2d-err";
+      box.innerHTML = '<strong>無法計算：</strong>' + msg;
+    }
+
+    function calc(){
+      var gender = $("gender").value;
+      var age    = parseFloat($("age").value);
+      var smoker = parseInt($("smoker").value, 10);
+      var sbp    = parseFloat($("sbp").value);
+      var cholRaw= parseFloat($("chol").value);
+      var hdlRaw = parseFloat($("hdl").value);
+      var a1cRaw = parseFloat($("hba1c").value);
+      var dmage  = parseFloat($("dmage").value);
+      var egfr   = parseFloat($("egfr").value);
+      var region = $("region").value;
+
+      var fields = {年齡:age, 收縮壓:sbp, 總膽固醇:cholRaw, "HDL-C":hdlRaw,
+                    HbA1c:a1cRaw, 糖尿病診斷年齡:dmage, eGFR:egfr};
+      for(var k in fields){
+        if(isNaN(fields[k])){ return showError("請填寫「" + k + "」。"); }
+      }
+      if(age < 40 || age > 69){
+        return showError("本模型僅適用 40 ～ 69 歲；您輸入的年齡為 " + age + " 歲。");
+      }
+      if(dmage > age){
+        return showError("糖尿病診斷年齡不能大於目前年齡。");
+      }
+      if(egfr <= 0){ return showError("eGFR 必須為正數。"); }
+
+      var chol  = toMmolL(cholRaw, units.chol);
+      var hdl   = toMmolL(hdlRaw,  units.hdl);
+      var hba1c = toMmolMol(a1cRaw, units.hba1c);
+
+      var pct = score2Diabetes({
+        gender:gender, age:age, smoker:smoker, sbp:sbp,
+        chol:chol, hdl:hdl, hba1c:hba1c, dmage:dmage,
+        egfr:egfr, region:region
+      });
+      if(pct === null || isNaN(pct)){
+        return showError("輸入值超出可計算範圍，請檢查後再試。");
+      }
+
+      var cat = classify(pct);
+      var box = $("result");
+      box.className = "s2d-result s2d-show s2d-" + cat.key;
+      box.innerHTML =
+        '<div>未來 10 年發生致死／非致死性心血管事件之風險：</div>' +
+        '<div class="s2d-pct">' + pct.toFixed(1) + '%</div>' +
+        '<div class="s2d-cat">風險分組：' + cat.label + '</div>' +
+        '<div class="s2d-advice">' + cat.advice + '</div>' +
+        '<div class="s2d-advice s2d-small" style="margin-top:10px;">' +
+        '計算依據：SCORE2-Diabetes（Eur Heart J 2023;44:2544-56）。' +
+        '本結果僅供衛教參考，實際處置請依您主治醫師建議。</div>';
+      try{ box.scrollIntoView({behavior:"smooth", block:"nearest"}); }catch(e){}
+    }
+
+    function reset(){
+      root.querySelectorAll('input[type="number"]').forEach(function(i){ i.value = ""; });
+      var r = $("result");
+      r.className = "s2d-result"; r.innerHTML = "";
+    }
+
+    root.querySelector('[data-s2d-action="calc"]').addEventListener("click", calc);
+    root.querySelector('[data-s2d-action="reset"]').addEventListener("click", reset);
+  }
+
+  function boot(){
+    document.querySelectorAll("[data-s2d-instance]").forEach(init);
+  }
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  } else { boot(); }
+})();
+</script>
+</div>
