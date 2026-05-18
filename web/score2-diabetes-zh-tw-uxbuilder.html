@@ -54,12 +54,6 @@
     }
     .s2d-wrap input[type="number"]:focus,
     .s2d-wrap select:focus{outline:2px solid #1565c0;outline-offset:1px;border-color:#1565c0;}
-    .s2d-unit-toggle{display:inline-flex;border:1px solid #c4cdd5;border-radius:6px;overflow:hidden;}
-    .s2d-unit-toggle button{
-      background:#fff;border:0;padding:8px 10px;font-size:.85em;color:#444;cursor:pointer;
-      line-height:1;font-family:inherit;
-    }
-    .s2d-unit-toggle button.s2d-active{background:#1565c0;color:#fff;}
     .s2d-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;}
     .s2d-btn{
       background:#1565c0;color:#fff;border:0;padding:11px 22px;font-size:1.02em;
@@ -148,36 +142,18 @@
       </div>
 
       <div class="s2d-field">
-        <label>總膽固醇</label>
-        <div class="s2d-input-row">
-          <input type="number" data-s2d="chol" min="50" max="500" step="0.1" placeholder="例：190">
-          <span class="s2d-unit-toggle" data-s2d-unit="chol">
-            <button type="button" data-val="mgdl" class="s2d-active">mg/dL</button>
-            <button type="button" data-val="mmol">mmol/L</button>
-          </span>
-        </div>
+        <label>總膽固醇（mg/dL）</label>
+        <input type="number" data-s2d="chol" min="50" max="500" step="1" placeholder="例：190">
       </div>
 
       <div class="s2d-field">
-        <label>高密度脂蛋白膽固醇（HDL-C）</label>
-        <div class="s2d-input-row">
-          <input type="number" data-s2d="hdl" min="10" max="200" step="0.1" placeholder="例：45">
-          <span class="s2d-unit-toggle" data-s2d-unit="hdl">
-            <button type="button" data-val="mgdl" class="s2d-active">mg/dL</button>
-            <button type="button" data-val="mmol">mmol/L</button>
-          </span>
-        </div>
+        <label>高密度脂蛋白膽固醇 HDL-C（mg/dL）</label>
+        <input type="number" data-s2d="hdl" min="10" max="200" step="1" placeholder="例：45">
       </div>
 
       <div class="s2d-field">
-        <label>糖化血色素 HbA1c</label>
-        <div class="s2d-input-row">
-          <input type="number" data-s2d="hba1c" min="3" max="20" step="0.1" placeholder="例：7.5">
-          <span class="s2d-unit-toggle" data-s2d-unit="hba1c">
-            <button type="button" data-val="pct" class="s2d-active">% (NGSP)</button>
-            <button type="button" data-val="mmol">mmol/mol (IFCC)</button>
-          </span>
-        </div>
+        <label>糖化血色素 HbA1c（%）</label>
+        <input type="number" data-s2d="hba1c" min="3" max="20" step="0.1" placeholder="例：7.5">
       </div>
 
       <div class="s2d-field">
@@ -244,12 +220,14 @@
     <em>SCORE2-Asia-Pacific</em>（2024）重新校正後的模型。
   </p>
 
-  <h3>單位換算說明</h3>
-  <ul>
-    <li>總膽固醇 / HDL-C：<code>mg/dL ÷ 38.67 = mmol/L</code></li>
-    <li>HbA1c：<code>mmol/mol = (NGSP% − 2.15) × 10.929</code>
-        （例：7.0% ≈ 53 mmol/mol；8.0% ≈ 64 mmol/mol）</li>
-  </ul>
+  <h3>單位說明</h3>
+  <p>
+    本計算器使用 <strong>台灣抽血報告常用單位</strong>：膽固醇與 HDL-C 為
+    <code>mg/dL</code>、HbA1c 為 <code>%</code>（NGSP）。
+    原始 SCORE2-Diabetes 模型使用歐洲 SI 單位（mmol/L、mmol/mol），
+    本工具於計算前已自動換算（mg/dL ÷ 38.67 = mmol/L；
+    mmol/mol = (NGSP% − 2.15) × 10.929），結果與原始演算法一致。
+  </p>
 
   <div class="s2d-warn">
     <strong>重要免責聲明：</strong>
@@ -388,30 +366,14 @@
       advice:"風險等同次級預防：LDL 目標 <55 mg/dL、強化降壓、優先選用有心血管預後實證之降糖藥物；請務必盡快與您的主治醫師討論整體治療計畫。"};
   }
 
-  // 單位換算
-  function toMmolL(val, unit){ return unit === "mmol" ? val : val / 38.67; }
-  function toMmolMol(val, unit){
-    return unit === "mmol" ? val : (val - 2.15) * 10.929;
-  }
+  // 台灣常用單位 → 演算法所需單位
+  function mgdlToMmolL(val){ return val / 38.67; }                // 膽固醇
+  function pctToMmolMol(val){ return (val - 2.15) * 10.929; }     // HbA1c NGSP→IFCC
 
   // 綁定每一個 instance
   function init(root){
     if(root.dataset.s2dBound) return;
     root.dataset.s2dBound = "1";
-
-    var units = { chol:"mgdl", hdl:"mgdl", hba1c:"pct" };
-
-    root.querySelectorAll("[data-s2d-unit]").forEach(function(grp){
-      grp.addEventListener("click", function(e){
-        var btn = e.target.closest("button[data-val]");
-        if(!btn) return;
-        var key = grp.getAttribute("data-s2d-unit");
-        units[key] = btn.getAttribute("data-val");
-        grp.querySelectorAll("button").forEach(function(b){
-          b.classList.toggle("s2d-active", b === btn);
-        });
-      });
-    });
 
     function $(name){ return root.querySelector('[data-s2d="'+name+'"]'); }
 
@@ -446,9 +408,9 @@
       }
       if(egfr <= 0){ return showError("eGFR 必須為正數。"); }
 
-      var chol  = toMmolL(cholRaw, units.chol);
-      var hdl   = toMmolL(hdlRaw,  units.hdl);
-      var hba1c = toMmolMol(a1cRaw, units.hba1c);
+      var chol  = mgdlToMmolL(cholRaw);
+      var hdl   = mgdlToMmolL(hdlRaw);
+      var hba1c = pctToMmolMol(a1cRaw);
 
       var pct = score2Diabetes({
         gender:gender, age:age, smoker:smoker, sbp:sbp,
